@@ -230,8 +230,6 @@ AstNode *parseExpression(Token *p_head, int length) {
     p_curr = p_curr->p_next;
   }
 
-  printf("%p\n", p_sep);
-
   // now p_sep contains add or sub, or NULL
   // expressionLength contains length of expression to parse
   if (p_sep == NULL) {
