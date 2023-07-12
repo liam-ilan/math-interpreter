@@ -74,13 +74,15 @@ void AstNode_print(AstNode *p_head, int depth) {
   }
 }
 
+// parse expression prototype
+AstNode *parseExpression(Token *, int);
+
 // parse unary
-// EBNF: unary = ("-", unary) | int | float
+// EBNF: unary = ("-", unary) | int | float | ("(", expression, ")")
 // length tells us when to stop parsing
 AstNode *parseUnary(Token *p_head, int length) {
-  
+
   if (length > 1 && strcmp(p_head->type, "sub") == 0) {
-    
     // case of "-", unary
     // allocate memory
     AstNode *res = (AstNode *)(malloc(sizeof(AstNode)));
@@ -92,8 +94,12 @@ AstNode *parseUnary(Token *p_head, int length) {
     res->p_headChild = parseUnary(p_head->p_next, length - 1);
     
     return res;
+
+  } else if (length > 1 && strcmp(p_head->type, "open") == 0) {
+    // case of "(", expression, ")"
+    return parseExpression(p_head->p_next, length - 2);
+
   } else if (length > 0) {
-    
     // float and int cases
     if (strcmp(p_head->type, "int") == 0) {
 
@@ -110,7 +116,6 @@ AstNode *parseUnary(Token *p_head, int length) {
       return res;
 
     } else if (strcmp(p_head->type, "float") == 0) {
-
       // float case
       // allocate memory
       AstNode *res = (AstNode *)(malloc(sizeof(AstNode)));
@@ -139,12 +144,22 @@ AstNode *parseFactor(Token *p_head, int length) {
   int factorLength = 0;
   int i = 0;
 
+  // we must ignore signs in brackets
+  int bracketCount = 0;
+
   while (p_curr != NULL && i < length) {
-    if (strcmp(p_curr->type, "mult") == 0 || strcmp(p_curr->type, "div") == 0) {
+    if (
+      bracketCount == 0 
+      && (strcmp(p_curr->type, "mult") == 0 || strcmp(p_curr->type, "div") == 0)
+    ) {
       factorLength = i;
       p_sep = p_curr;
     };
-    
+
+    // handle bracket count
+    if (strcmp(p_curr->type, "open") == 0) bracketCount++;
+    else if (strcmp(p_curr->type, "close") == 0) bracketCount--;
+
     p_curr = p_curr->p_next;
     i++;
   }
@@ -210,10 +225,14 @@ AstNode *parseExpression(Token *p_head, int length) {
   // true when, if the next token is a "-", it can be considered as subtraction, rather than negation
   bool subFlag = false;
 
+  // we must ignore signs in brackets
+  int bracketCount = 0;
+
   while (p_curr != NULL && i < length) {
     if (
-      strcmp(p_curr->type, "add") == 0 
-      || (strcmp(p_curr->type, "sub") == 0 && subFlag)
+      bracketCount == 0
+      && (strcmp(p_curr->type, "add") == 0 
+      || (strcmp(p_curr->type, "sub") == 0 && subFlag))
     ) {
       expressionLength = i;
       p_sep = p_curr;
@@ -226,6 +245,10 @@ AstNode *parseExpression(Token *p_head, int length) {
       subFlag = false;
     }
 
+    // handle bracket count
+    if (strcmp(p_curr->type, "open") == 0) bracketCount++;
+    else if (strcmp(p_curr->type, "close") == 0) bracketCount--;
+    
     i++;
     p_curr = p_curr->p_next;
   }
