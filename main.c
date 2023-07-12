@@ -133,7 +133,7 @@ AstNode *parseFactor(Token *p_head, int length) {
   
   // loop through tokens until specified length reached
   // keep track of length of first factor
-  // p_sep contains pointer to token seperating
+  // p_sep contains pointer to token seperating the factor and unary
   Token *p_curr = p_head;
   Token *p_sep = NULL;
   int factorLength = 0;
@@ -183,7 +183,6 @@ AstNode *parseFactor(Token *p_head, int length) {
       res->opCode = "mult";
       res->val = NULL;
       res->p_next = NULL;
-      printf("%s: %i\n", p_sep->type, factorLength);
       res->p_headChild = parseFactor(p_head, factorLength);
       
       res->p_headChild->p_next = parseUnary(p_sep->p_next, length - factorLength);
@@ -194,38 +193,48 @@ AstNode *parseFactor(Token *p_head, int length) {
 }
 
 // parse expression
-// EBNF: expression = (factor, ("+" | "-"), expression) | factor;
+// EBNF: expression = (expression, ("+" | "-"), factor) | factor;
 // length tells us when to stop parsing
 AstNode *parseExpression(Token *p_head, int length) {
   
-  // loop until "+" or "-" found
+  // loop through tokens until specified length reached
+  // keep track of length of first expression
+  // p_sep contains pointer to token seperating the expression and factor
   // note: unary "-" takes precedent over expression "-"
   // thus we must filter out negations, and only consider (float | int), "-" as a subtraction
   Token *p_curr = p_head;
-  int factorLength = 0;
+  Token *p_sep = NULL;
+  int expressionLength = 0;
+  int i = 0;
 
   // true when, if the next token is a "-", it can be considered as subtraction, rather than negation
   bool subFlag = false;
 
-  while (
-    p_curr != NULL
-    && strcmp(p_curr->type, "add") != 0
-    && !(strcmp(p_curr->type, "sub") == 0 && subFlag)
-    && factorLength <= length
-  ) {
+  while (p_curr != NULL && i < length) {
+    if (
+      strcmp(p_curr->type, "add") == 0 
+      || (strcmp(p_curr->type, "sub") == 0 && subFlag)
+    ) {
+      expressionLength = i;
+      p_sep = p_curr;
+    }
+
     // handle subFlag
     if (strcmp(p_curr->type, "int") == 0 || strcmp(p_curr->type, "float") == 0) {
       subFlag = true;
     } else {
       subFlag = false;
     }
-    factorLength++;
+
+    i++;
     p_curr = p_curr->p_next;
   }
 
-  // now p_curr contains either NULL, or token containing add/sub symbol
-  // factorLength contains the length of the first factor
-  if (factorLength == length + 1) {
+  printf("%p\n", p_sep);
+
+  // now p_sep contains add or sub, or NULL
+  // expressionLength contains length of expression to parse
+  if (p_sep == NULL) {
     
     // case where whole expression is factor
     return parseFactor(p_head, length);
@@ -233,7 +242,7 @@ AstNode *parseExpression(Token *p_head, int length) {
     
     // case where add/sub present
     // test for add/sub
-    if (strcmp(p_curr->type, "add") == 0) {
+    if (strcmp(p_sep->type, "add") == 0) {
       
       // div case
       // allocate memory
@@ -243,13 +252,12 @@ AstNode *parseExpression(Token *p_head, int length) {
       res->opCode = "add";
       res->val = NULL;
       res->p_next = NULL;
-      res->p_headChild = parseFactor(p_head, factorLength);
-      res->p_headChild->p_next = parseExpression(p_curr->p_next, length - factorLength - 1);
-      
+      res->p_headChild = parseExpression(p_head, expressionLength);
+      res->p_headChild->p_next = parseFactor(p_sep->p_next, length - expressionLength);
 
       return res;
 
-    } else if (strcmp(p_curr->type, "sub") == 0) {
+    } else if (strcmp(p_sep->type, "sub") == 0) {
 
       // mult case
       // allocate memory
@@ -259,9 +267,10 @@ AstNode *parseExpression(Token *p_head, int length) {
       res->opCode = "sub";
       res->val = NULL;
       res->p_next = NULL;
-      res->p_headChild = parseFactor(p_head, factorLength);
-      res->p_headChild->p_next = parseExpression(p_curr->p_next, length - factorLength - 1);
-
+      res->p_headChild = parseExpression(p_head, expressionLength);
+      
+      res->p_headChild->p_next = parseFactor(p_sep->p_next, length - expressionLength);
+    
       return res;
     }
   }
