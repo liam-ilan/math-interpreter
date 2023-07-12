@@ -127,35 +127,38 @@ AstNode *parseUnary(Token *p_head, int length) {
 }
 
 // parse factor
-// EBNF: factor = (unary, ("*" | "/"), factor) | unary;
+// EBNF: factor = (factor, ("*" | "/"), unary) | unary;
 // length tells us when to stop parsing
 AstNode *parseFactor(Token *p_head, int length) {
   
-  // loop until "*" or "/" found
+  // loop through tokens until specified length reached
+  // keep track of length of first factor
+  // p_sep contains pointer to token seperating
   Token *p_curr = p_head;
-  int unaryLength = 0;
+  Token *p_sep = NULL;
+  int factorLength = 0;
+  int i = 0;
 
-  while (
-    p_curr != NULL
-    && strcmp(p_curr->type, "mult") != 0
-    && strcmp(p_curr->type, "div") != 0
-    && unaryLength <= length
-  ) {
-    unaryLength++;
+  while (p_curr != NULL && i < length) {
+    if (strcmp(p_curr->type, "mult") == 0 || strcmp(p_curr->type, "div") == 0) {
+      factorLength = i;
+      p_sep = p_curr;
+    };
+    
     p_curr = p_curr->p_next;
+    i++;
   }
 
-  // now p_curr contains either the token after the last token of a unary (not mult or div)
-  // or token containing mult/div symbol
-  // unaryLength contains the length of the first unary
-  if (unaryLength == length + 1) {
+  // now p_sep contains mult or div, or NULL
+  // factorLength contains length of factor to parse
+  if (p_sep == NULL) {
     // case where whole expression is unary
     return parseUnary(p_head, length);
   } else { 
     
     // case where factor present
     // test for division/multiplication
-    if (strcmp(p_curr->type, "div") == 0) {
+    if (strcmp(p_sep->type, "div") == 0) {
       
       // div case
       // allocate memory
@@ -165,12 +168,12 @@ AstNode *parseFactor(Token *p_head, int length) {
       res->opCode = "div";
       res->val = NULL;
       res->p_next = NULL;
-      res->p_headChild = parseUnary(p_head, unaryLength);
-      res->p_headChild->p_next = parseFactor(p_curr->p_next, length - unaryLength - 1);
+      res->p_headChild = parseFactor(p_head, factorLength);
+      res->p_headChild->p_next = parseUnary(p_sep->p_next, length - factorLength);
 
       return res;
 
-    } else if (strcmp(p_curr->type, "mult") == 0) {
+    } else if (strcmp(p_sep->type, "mult") == 0) {
 
       // mult case
       // allocate memory
@@ -180,8 +183,10 @@ AstNode *parseFactor(Token *p_head, int length) {
       res->opCode = "mult";
       res->val = NULL;
       res->p_next = NULL;
-      res->p_headChild = parseUnary(p_head, unaryLength);
-      res->p_headChild->p_next = parseFactor(p_curr->p_next, length - unaryLength - 1);
+      printf("%s: %i\n", p_sep->type, factorLength);
+      res->p_headChild = parseFactor(p_head, factorLength);
+      
+      res->p_headChild->p_next = parseUnary(p_sep->p_next, length - factorLength);
 
       return res;
     }
