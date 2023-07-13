@@ -370,11 +370,22 @@ int main() {
   // for each char (including terminator)
   for (int i = 0; i <= fileLength; i++) {
     char c = code[i];
+    
+    // error check for invalid chars
+    if (strchr(" .1234567890/*+-()\0\t\n\r", c) == NULL) {
+      printf("Syntax Error: Unexpected char '%c'.\n", c);
+      return 0;
+    }
 
     // if is a digit char
     if(isdigit(c) > 0 || c == '.') {
+      // numbers with decimals are floats
       if (c == '.') {
-        isFloat = true;
+        if (isFloat == false) isFloat = true;
+        else {
+          printf("Syntax Error: Too many decimal points in a single float.\n");
+          return 0;
+        }
       }
 
       if (isNumber == false) {
@@ -383,18 +394,21 @@ int main() {
 
       isNumber = true;
     } else if (isNumber == true) {
-
+      // reached end of digits, create number token
       char *val = malloc(i - currNumberStart + 1);
       val[i - currNumberStart] = 0;
       strncpy(val, &code[currNumberStart], i - currNumberStart);
 
+      // add token
       Token_push(&headToken, val, isFloat ? "float" : "int");
       tokenCount++;
 
+      // reset flags
       isNumber = false;
       isFloat = false;
     }
-
+    
+    // push operator tokens
     if (c == '+') {
       Token_push(&headToken, "+", "add"); 
       tokenCount++;
@@ -406,9 +420,6 @@ int main() {
       tokenCount++;
     } else if (c == '*') {
       Token_push(&headToken, "*", "mult"); 
-      tokenCount++;
-    } else if (c == '%') {
-      Token_push(&headToken, "\%", "mod");
       tokenCount++;
     } else if (c == '(') {
       Token_push(&headToken, "(", "open");
