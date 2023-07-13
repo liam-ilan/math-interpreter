@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 
 // token
 // linked list element containing pointer to next token, type of token, and value
@@ -23,22 +24,22 @@ void Token_print(Token *p_head) {
 
 // add token to list
 void Token_push(Token *p_head, char *val, char* type) {
-    // loop to end of list
-    Token *p_curr = p_head;
-    while (p_curr->p_next != NULL) {
-      p_curr = p_curr->p_next;
-    }
+  // loop to end of list
+  Token *p_curr = p_head;
+  while (p_curr->p_next != NULL) {
+    p_curr = p_curr->p_next;
+  }
 
-    // allocate memory for new token
-    Token *p_newToken = (Token *)(malloc(sizeof(Token)));
+  // allocate memory for new token
+  Token *p_newToken = (Token *)(malloc(sizeof(Token)));
 
-    // add new node to end of list
-    p_curr->p_next = p_newToken;
+  // add new node to end of list
+  p_curr->p_next = p_newToken;
 
-    // write data
-    p_curr->p_next->val = val;
-    p_curr->p_next->type = type;
-    p_curr->p_next->p_next = NULL;
+  // write data
+  p_curr->p_next->val = val;
+  p_curr->p_next->type = type;
+  p_curr->p_next->p_next = NULL;
 }
 
 // node in ast
@@ -74,6 +75,20 @@ void AstNode_print(AstNode *p_head, int depth) {
   }
 }
 
+// error AST node
+AstNode *errorNode(char* errorMessage) {
+    // allocate memory
+    AstNode *res = (AstNode *)(malloc(sizeof(AstNode)));
+
+    // populate memory
+    res->opCode = "err";
+    res->val = errorMessage;
+    res->p_next = NULL;
+    res->p_headChild = NULL;
+    
+    return res;
+}
+
 // parse expression prototype
 AstNode *parseExpression(Token *, int);
 
@@ -81,7 +96,6 @@ AstNode *parseExpression(Token *, int);
 // EBNF: unary = ("-", unary) | int | float | ("(", expression, ")")
 // length tells us when to stop parsing
 AstNode *parseUnary(Token *p_head, int length) {
-
   if (length > 1 && strcmp(p_head->type, "sub") == 0) {
     // case of "-", unary
     // allocate memory
@@ -97,7 +111,21 @@ AstNode *parseUnary(Token *p_head, int length) {
 
   } else if (length > 1 && strcmp(p_head->type, "open") == 0) {
     // case of "(", expression, ")"
-    return parseExpression(p_head->p_next, length - 2);
+
+    // loop to last token
+    Token *p_curr = p_head;
+    int i = 0;
+
+    while (p_curr->p_next != NULL && i < length - 1) {
+      p_curr = p_curr->p_next;
+      i++;
+    }
+
+    // if last token is close, parse expression
+    // if not, this is incomplete brackets, return error.
+    printf("%s\n", p_curr->type);
+    if (strcmp(p_curr->type, "close") == 0) return parseExpression(p_head->p_next, length - 2);
+    else return errorNode("Syntax Error: Incomplete brackets.\n");
 
   } else if (length > 0) {
     // float and int cases
@@ -127,6 +155,8 @@ AstNode *parseUnary(Token *p_head, int length) {
       res->p_headChild = NULL;
 
       return res;
+    } else {
+      return errorNode("Syntax Error: Unexpected token, where integer or float was expected.\n");
     }
   }
 }
@@ -135,7 +165,11 @@ AstNode *parseUnary(Token *p_head, int length) {
 // EBNF: factor = (factor, ("*" | "/"), unary) | unary;
 // length tells us when to stop parsing
 AstNode *parseFactor(Token *p_head, int length) {
-  
+  // error handling for first token
+  if (strcmp(p_head->type, "mult") == 0 || strcmp(p_head->type, "div") == 0) {
+    return errorNode("Syntax Error: Binary multiplication or division operator supplied single value.\n");
+  }
+
   // loop through tokens until specified length reached
   // keep track of length of first factor
   // p_sep contains pointer to token seperating the factor and unary
@@ -154,8 +188,19 @@ AstNode *parseFactor(Token *p_head, int length) {
     ) {
       factorLength = i;
       p_sep = p_curr;
-    };
+    }
 
+    if (strcmp(p_curr->type, "mult") == 0 || strcmp(p_curr->type, "div") == 0) {
+      // error handling for last token
+      if (p_curr->p_next == NULL || i == length - 1) {
+        return errorNode("Syntax Error: Binary multiplication or division operator supplied single value.\n");
+      }
+
+      // error handling for consecutive +/-
+      if (strcmp(p_curr->p_next->type, "mult") == 0 || strcmp(p_curr->p_next->type, "div") == 0) {
+        return errorNode("Syntax Error: Multiple multiplication or division operators in a row.\n");
+      }
+    }
     // handle bracket count
     if (strcmp(p_curr->type, "open") == 0) bracketCount++;
     else if (strcmp(p_curr->type, "close") == 0) bracketCount--;
@@ -211,7 +256,11 @@ AstNode *parseFactor(Token *p_head, int length) {
 // EBNF: expression = (expression, ("+" | "-"), factor) | factor;
 // length tells us when to stop parsing
 AstNode *parseExpression(Token *p_head, int length) {
-  
+  // error handling for first token
+  if (strcmp(p_head->type, "add") == 0) {
+    return errorNode("Syntax Error: Binary addition or subtraction operator supplied single value.\n");
+  }
+
   // loop through tokens until specified length reached
   // keep track of length of first expression
   // p_sep contains pointer to token seperating the expression and factor
@@ -239,10 +288,26 @@ AstNode *parseExpression(Token *p_head, int length) {
     }
 
     // handle subFlag
-    if (strcmp(p_curr->type, "int") == 0 || strcmp(p_curr->type, "float") == 0) {
+    if (
+      strcmp(p_curr->type, "int") == 0 
+      || strcmp(p_curr->type, "float") == 0 
+      || strcmp(p_curr->type, "close") == 0
+    ) {
       subFlag = true;
     } else {
       subFlag = false;
+    }
+    
+    if (strcmp(p_curr->type, "add") == 0 || strcmp(p_curr->type, "sub") == 0) {
+      // error handling for last token
+      if (p_curr->p_next == NULL || i == length - 1) {
+        return errorNode("Syntax Error: Binary addition or subtraction operator supplied single value.\n");
+      }
+
+      // error handling for consecutive +/-
+      if (strcmp(p_curr->p_next->type, "add") == 0 || strcmp(p_curr->p_next->type, "sub") == 0) {
+        return errorNode("Syntax Error: Multiple addition or subtraction operators in a row.\n");
+      }
     }
 
     // handle bracket count
@@ -319,7 +384,10 @@ double execute(AstNode *node) {
     return execute(node->p_headChild) + execute(node->p_headChild->p_next);
   } else if (strcmp(node->opCode, "sub") == 0) {
     return execute(node->p_headChild) - execute(node->p_headChild->p_next);
-  }
+  } else if (strcmp(node->opCode, "err") == 0) {
+    printf("%s", node->val);
+    return NAN;
+  } 
 }
 
 int main() {
