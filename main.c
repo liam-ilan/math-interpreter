@@ -369,25 +369,64 @@ AstNode *parseProgram(Token *p_head, int length) {
   return parseExpression(p_head->p_next, length - 2);
 }
 
-double execute(AstNode *node) {
+// struct to be returned from execute
+typedef struct executeRes {
+  bool isInt;
+  double val;
+} executeRes;
+
+// traverse tree and execute each node
+executeRes *execute(AstNode *node) {
+  executeRes *res = (executeRes *)(malloc(sizeof(executeRes)));
+
   if (strcmp(node->opCode, "int") == 0) {
-    return atof(node->val);
+    res->val = atof(node->val);
+    res->isInt = true;
+
   } else if (strcmp(node->opCode, "float") == 0) {
-    return atof(node->val);
+    res->val = atof(node->val);
+    res->isInt = false;
+    
   } else if (strcmp(node->opCode, "neg") == 0) {
-    return -execute(node->p_headChild);
+    executeRes *arg1 = execute(node->p_headChild);
+    res->val = -arg1->val;
+    res->isInt = arg1->isInt;
+
   } else if (strcmp(node->opCode, "mult") == 0) {
-    return execute(node->p_headChild) * execute(node->p_headChild->p_next);
+    executeRes *arg1 = execute(node->p_headChild);
+    executeRes *arg2 = execute(node->p_headChild->p_next);
+
+    res->val = arg1->val * arg2->val;
+    res->isInt = arg1->isInt && arg2->isInt;
+
   } else if (strcmp(node->opCode, "div") == 0) {
-    return execute(node->p_headChild) / execute(node->p_headChild->p_next);
+    executeRes *arg1 = execute(node->p_headChild);
+    executeRes *arg2 = execute(node->p_headChild->p_next);
+
+    res->val = arg1->val / arg2->val;
+    res->isInt = false;
+
   } else if (strcmp(node->opCode, "add") == 0) {
-    return execute(node->p_headChild) + execute(node->p_headChild->p_next);
+    executeRes *arg1 = execute(node->p_headChild);
+    executeRes *arg2 = execute(node->p_headChild->p_next);
+
+    res->val = arg1->val + arg2->val;
+    res->isInt = arg1->isInt && arg2->isInt;
+
   } else if (strcmp(node->opCode, "sub") == 0) {
-    return execute(node->p_headChild) - execute(node->p_headChild->p_next);
+    executeRes *arg1 = execute(node->p_headChild);
+    executeRes *arg2 = execute(node->p_headChild->p_next);
+
+    res->val = arg1->val - arg2->val;
+    res->isInt = arg1->isInt && arg2->isInt;
+
   } else if (strcmp(node->opCode, "err") == 0) {
     printf("%s", node->val);
-    return NAN;
+    res->val = NAN;
+    res->isInt = false;
   } 
+
+  return res;
 }
 
 int main() {
@@ -515,6 +554,15 @@ int main() {
 
   // execute label
   printf("\n\e[4m\e[1mEXECUTE\e[0m\n");
-  printf("%f\n", execute(p_headAstNode));
+
+  // execute
+  executeRes *res = execute(p_headAstNode);
+
+  if (res->isInt) {
+    printf("%i\n", (int) res->val);
+  } else {
+    printf("%f\n", res->val);
+  }
+  
   return 0;
 }
