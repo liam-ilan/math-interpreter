@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
+// #include <emscripten.h>
 
 // token
 // linked list element containing pointer to next token, type of token, and value
@@ -429,36 +430,21 @@ executeRes *execute(AstNode *node) {
   return res;
 }
 
-int main() {
+int dub(int i) {
+  return i * 2;
+}
+
+// runs code given string
+void run(char *code, int fileLength) {
 
   // code label
-  printf("\n\e[4m\e[1mCODE\e[0m\n");
-
-  // open file
-  FILE *p_file = fopen("code.txt", "r");
-
-  // go to end, and record position (this will be the length of the file)
-  fseek(p_file, 0, SEEK_END);
-  long fileLength = ftell(p_file);
-
-  // rewind to start
-  rewind(p_file);
-
-  // allocate memory (+1 for 0 terminated string)
-  char *code = malloc(fileLength + 1);
-
-  // read file and close
-  fread(code, fileLength, 1, p_file);
-  fclose(p_file);
-
-  // set terminator to 0
-  code[fileLength] = 0;
+  printf("CODE\n");
 
   // print code
   printf("%s\n", code);
 
   // tokens label
-  printf("\n\e[4m\e[1mTOKENS\e[0m\n");
+  printf("\nTOKENS\n");
 
   // token list
   Token headToken = {"SOF", "SOF", NULL};
@@ -481,7 +467,7 @@ int main() {
     // error check for invalid chars
     if (strchr(" .1234567890/*+-()\0\t\n\r", c) == NULL) {
       printf("Syntax Error: Unexpected char '%c'.\n", c);
-      return 0;
+      return;
     }
 
     // if is a digit char
@@ -491,7 +477,7 @@ int main() {
         if (isFloat == false) isFloat = true;
         else {
           printf("Syntax Error: Too many decimal points in a single float.\n");
-          return 0;
+          return;
         }
       }
 
@@ -544,7 +530,7 @@ int main() {
   Token_print(&headToken);
 
   // ast label
-  printf("\n\e[4m\e[1mAST\e[0m\n");
+  printf("\nAST\n");
 
   // parse
   AstNode *p_headAstNode = parseProgram(&headToken, tokenCount);
@@ -553,7 +539,7 @@ int main() {
   AstNode_print(p_headAstNode, 0);
 
   // execute label
-  printf("\n\e[4m\e[1mEXECUTE\e[0m\n");
+  printf("\nEXECUTE\n");
 
   // execute
   executeRes *res = execute(p_headAstNode);
@@ -563,6 +549,33 @@ int main() {
   } else {
     printf("%f\n", res->val);
   }
-  
+}
+
+int main() {
+  #ifdef __EMSCRIPTEN__
   return 0;
+  #else
+  // open file
+  FILE *p_file = fopen("code.txt", "r");
+
+  // go to end, and record position (this will be the length of the file)
+  fseek(p_file, 0, SEEK_END);
+  long fileLength = ftell(p_file);
+
+  // rewind to start
+  rewind(p_file);
+
+  // allocate memory (+1 for 0 terminated string)
+  char *code = malloc(fileLength + 1);
+
+  // read file and close
+  fread(code, fileLength, 1, p_file);
+  fclose(p_file);
+
+  // set terminator to 0
+  code[fileLength] = 0;
+
+  run(code, fileLength);
+  return 0;
+  #endif
 }
