@@ -593,6 +593,12 @@ void run(char *code, int fileLength) {
   while (p_curr != NULL) {
     p_tmp = p_curr;
     p_curr = p_curr->p_next;
+
+    // free val (also malloced if int or float, thus must be freed)
+    if(strcmp(p_tmp->type, "int") == 0 || strcmp(p_tmp->type, "float") == 0) {
+      free(p_tmp->val);
+    }
+    
     free(p_tmp);
   }
 
