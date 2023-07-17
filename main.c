@@ -55,6 +55,22 @@ typedef struct AstNode {
   char *val;
 } AstNode;
 
+// frees ast
+void AstNode_free(AstNode *p_head) {
+  // for each child, free memory
+  AstNode *p_curr = p_head->p_headChild;
+  AstNode *p_tmp = NULL;
+  
+  while (p_curr != NULL) {
+    p_tmp = p_curr;
+    p_curr = p_curr->p_next;
+    AstNode_free(p_tmp);
+  }
+
+  // free self
+  free(p_head);
+}
+
 // print ast nicely
 void AstNode_print(AstNode *p_head, int depth) {
 
@@ -173,6 +189,8 @@ AstNode *parseUnary(Token *p_head, int length) {
       return errorNode("Syntax Error: Unexpected token, where integer or float was expected.\n");
     }
   }
+
+  return errorNode("Syntax Error: Unidentifiable issue.\n");
 }
 
 // parse factor
@@ -263,6 +281,8 @@ AstNode *parseFactor(Token *p_head, int length) {
       return res;
     }
   }
+
+  return errorNode("Syntax Error: Unidentifiable issue.\n");
 }
 
 // parse expression
@@ -372,6 +392,8 @@ AstNode *parseExpression(Token *p_head, int length) {
       return res;
     }
   }
+
+  return errorNode("Syntax Error: Unidentifiable issue.\n");
 }
 
 // parse program
@@ -463,7 +485,6 @@ void run(char *code, int fileLength) {
 
   // token list
   Token headToken = {"SOF", "SOF", NULL};
-  Token *p_prevToken = &headToken;
 
   // lexing flags
   bool isNumber = false;
@@ -564,12 +585,26 @@ void run(char *code, int fileLength) {
   } else {
     printf("%f\n", res->val);
   }
+
+  // free tokens
+  Token *p_tmp = NULL;
+  Token *p_curr = headToken.p_next;
+  
+  while (p_curr != NULL) {
+    p_tmp = p_curr;
+    p_curr = p_curr->p_next;
+    free(p_tmp);
+  }
+
+  // free ast
+  AstNode_free(p_headAstNode);
+
+  // free res
+  free(res);
 }
 
+#ifndef __EMSCRIPTEN__
 int main() {
-  #ifdef __EMSCRIPTEN__
-  return 0;
-  #else
   // open file
   FILE *p_file = fopen("code.txt", "r");
 
@@ -591,6 +626,8 @@ int main() {
   code[fileLength] = 0;
 
   run(code, fileLength);
+
+  free(code);
   return 0;
-  #endif
 }
+#endif
