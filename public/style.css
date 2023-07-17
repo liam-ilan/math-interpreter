@@ -1,6 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
 body, html {
   font-family: 'Source Code Pro', monospace;
+  background-color: #272822;
+  color: #F8F8F2;
+}
+
+h1 {
+  font-size: 2.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  font-weight: normal;
 }
 
 pre {
@@ -9,26 +20,89 @@ pre {
   margin: 10px;
   text-align: left;
   display: none;
-  width: 50%;
+  width: 100%;
   margin: auto;
+  margin-top: 1em;
+  padding: 0.3em;
+  font-size: 2em;
+  border: 2px solid #F8F8F2;
+  min-height: 6em;
 }
 
 input, button {
+  color: #F8F8F2; 
+  background-color: #272822;
   font-family: 'Source Code Pro', monospace;
+  font-size: 2em;
+  padding: 0.2em;
+  margin: 0.1em;
+  border-radius: 5px;
+  border: 2px solid #F8F8F2;
+}
+
+::selection {
+  background-color: #FD971F;
+  color: #272822;
+}
+
+input::placeholder {
+  color: #75715E;
+}
+
+.selectionButton {
+  width: 100%;
 }
 
 .selected {
-  background-color: red;
+  background-color: #75715E;
 }
 
 .show {
   display: block;
 }
 
+#expr {
+  width: 100%;
+  flex: 7;
+}
+
+#submit { 
+  width: 100%;
+  flex: 1;
+}
+
 #container {
-  text-align: center;
+  margin: auto;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
 }
 
 #out {
   display: flex;
 } 
+
+#selection, #inputs {
+  display: flex;
+}
+
+#header {
+  max-width: 800px;
+  margin: auto;
+}
+
+#codeSelect {
+  color: #F92672;
+}
+
+#tokensSelect {
+  color: #E6DB74
+}
+
+#astSelect {
+  color: #A6E22E
+}
+
+#executeSelect {
+  color: #66D9EF
+}

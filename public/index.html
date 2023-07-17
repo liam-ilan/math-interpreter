@@ -7,10 +7,16 @@
   </head>
   <body>
 
+    <div id="header">
+      <h1>Just a Math Interpeter</h1>
+      <h2>Written in C, compiled to WASM</h2>
+    </div>
+
     <div id="container">
-      <input id="expr"></input>
-      <button id="submit">Submit</button>
-      
+      <div id="inputs">
+        <input id="expr" placeholder="Eg. 1 + 2 * (3 / 4) - 5"></input>
+        <button id="submit">↵</button>
+      </div>
       <div id="selection">
         <button id="codeSelect" class="selectionButton">Input</button>
         <button id="tokensSelect" class="selectionButton">Tokens</button>
@@ -24,7 +30,7 @@
         <pre id="execute"></pre>
       </div>
     </div>
-
+    
     <script type="text/javascript" src="index.js"></script>
     <script type="text/javascript" src="run.js"></script>
   </body>
