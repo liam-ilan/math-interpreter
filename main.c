@@ -116,7 +116,7 @@ AstNode *parseUnary(Token *p_head, int length) {
     // loop to last token
     Token *p_curr = p_head;
     int i = 0;
-
+    
     while (p_curr->p_next != NULL && i < length - 1) {
       p_curr = p_curr->p_next;
       i++;
@@ -124,7 +124,6 @@ AstNode *parseUnary(Token *p_head, int length) {
 
     // if last token is close, parse expression
     // if not, this is incomplete brackets, return error.
-    printf("%s\n", p_curr->type);
     if (strcmp(p_curr->type, "close") == 0) return parseExpression(p_head->p_next, length - 2);
     else return errorNode("Syntax Error: Incomplete brackets.\n");
 
@@ -230,7 +229,7 @@ AstNode *parseFactor(Token *p_head, int length) {
       res->val = NULL;
       res->p_next = NULL;
       res->p_headChild = parseFactor(p_head, factorLength);
-      res->p_headChild->p_next = parseUnary(p_sep->p_next, length - factorLength);
+      res->p_headChild->p_next = parseUnary(p_sep->p_next, length - factorLength - 1);
 
       return res;
 
@@ -245,8 +244,7 @@ AstNode *parseFactor(Token *p_head, int length) {
       res->val = NULL;
       res->p_next = NULL;
       res->p_headChild = parseFactor(p_head, factorLength);
-      
-      res->p_headChild->p_next = parseUnary(p_sep->p_next, length - factorLength);
+      res->p_headChild->p_next = parseUnary(p_sep->p_next, length - factorLength - 1);
 
       return res;
     }
@@ -340,7 +338,7 @@ AstNode *parseExpression(Token *p_head, int length) {
       res->val = NULL;
       res->p_next = NULL;
       res->p_headChild = parseExpression(p_head, expressionLength);
-      res->p_headChild->p_next = parseFactor(p_sep->p_next, length - expressionLength);
+      res->p_headChild->p_next = parseFactor(p_sep->p_next, length - expressionLength - 1);
 
       return res;
 
@@ -355,8 +353,7 @@ AstNode *parseExpression(Token *p_head, int length) {
       res->val = NULL;
       res->p_next = NULL;
       res->p_headChild = parseExpression(p_head, expressionLength);
-      
-      res->p_headChild->p_next = parseFactor(p_sep->p_next, length - expressionLength);
+      res->p_headChild->p_next = parseFactor(p_sep->p_next, length - expressionLength - 1);
     
       return res;
     }
