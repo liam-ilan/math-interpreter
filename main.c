@@ -66,7 +66,7 @@ void AstNode_print(AstNode *p_head, int depth) {
   while (p_curr != NULL) {
     
     // create appropriate whitespace and dash
-    for (int x = 0; x < depth; x++) printf("  ");
+    for (int x = 0; x < depth + 1; x++) printf("  ");
     printf("- ");
 
     // print child
@@ -364,6 +364,10 @@ AstNode *parseExpression(Token *p_head, int length) {
 // EBNF: program = SOF, expression, EOF
 // length tells us when to stop parsing
 AstNode *parseProgram(Token *p_head, int length) {
+  // no tokens
+  if (length == 2) return errorNode("Syntax Error: Empty input.\n");
+
+  // otherwise parse expression
   return parseExpression(p_head->p_next, length - 2);
 }
 
