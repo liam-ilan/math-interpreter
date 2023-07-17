@@ -97,6 +97,7 @@ AstNode *parseExpression(Token *, int);
 // EBNF: unary = ("-", unary) | int | float | ("(", expression, ")")
 // length tells us when to stop parsing
 AstNode *parseUnary(Token *p_head, int length) {
+
   if (length > 1 && strcmp(p_head->type, "sub") == 0) {
     // case of "-", unary
     // allocate memory
@@ -128,6 +129,19 @@ AstNode *parseUnary(Token *p_head, int length) {
     else return errorNode("Syntax Error: Incomplete brackets.\n");
 
   } else if (length > 0) {
+    // error catching for case where there is close brackets where there shouldn't be
+    // loop to last token
+    Token *p_curr = p_head;
+    int i = 0;
+    
+    while (p_curr->p_next != NULL && i < length - 1) {
+      p_curr = p_curr->p_next;
+      i++;
+    }
+
+    // return appropriate error
+    if (strcmp(p_curr->type, "close") == 0) return errorNode("Syntax Error: Incomplete brackets.\n");
+
     // float and int cases
     if (strcmp(p_head->type, "int") == 0) {
 

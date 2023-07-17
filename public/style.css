@@ -1,0 +1,9 @@
+pre {
+  overflow: auto;
+  width: 25%;
+  margin: 10px;
+}
+
+#out {
+  display: flex;
+} 

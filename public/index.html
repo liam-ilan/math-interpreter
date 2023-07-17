@@ -3,11 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="./style.css">
   </head>
   <body>
     <input id="expr"></input>
     <button id="submit">Submit</button>
-    <pre id="out"></pre>
+    <div id="out">
+      <pre id="code"></pre>
+      <pre id="tokens"></pre>
+      <pre id="ast"></pre>
+      <pre id="execute"></pre>
+    </div>
 
     <script type="text/javascript" src="index.js"></script>
     <script type="text/javascript" src="run.js"></script>
