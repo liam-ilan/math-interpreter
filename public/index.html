@@ -6,13 +6,23 @@
     <link rel="stylesheet" href="./style.css">
   </head>
   <body>
-    <input id="expr"></input>
-    <button id="submit">Submit</button>
-    <div id="out">
-      <pre id="code"></pre>
-      <pre id="tokens"></pre>
-      <pre id="ast"></pre>
-      <pre id="execute"></pre>
+
+    <div id="container">
+      <input id="expr"></input>
+      <button id="submit">Submit</button>
+      
+      <div id="selection">
+        <button id="codeSelect" class="selectionButton">Input</button>
+        <button id="tokensSelect" class="selectionButton">Tokens</button>
+        <button id="astSelect" class="selectionButton">AST</button>
+        <button id="executeSelect" class="selectionButton">Result</button>
+      </div>
+      <div id="out">
+        <pre id="code"></pre>
+        <pre id="tokens"></pre>
+        <pre id="ast"></pre>
+        <pre id="execute"></pre>
+      </div>
     </div>
 
     <script type="text/javascript" src="index.js"></script>

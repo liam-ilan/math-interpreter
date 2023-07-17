@@ -1,7 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+body, html {
+  font-family: 'Source Code Pro', monospace;
+}
+
 pre {
+  font-family: 'Source Code Pro', monospace;
   overflow: auto;
-  width: 25%;
   margin: 10px;
+  text-align: left;
+  display: none;
+  width: 50%;
+  margin: auto;
+}
+
+input, button {
+  font-family: 'Source Code Pro', monospace;
+}
+
+.selected {
+  background-color: red;
+}
+
+.show {
+  display: block;
+}
+
+#container {
+  text-align: center;
 }
 
 #out {
