@@ -610,9 +610,15 @@ void run(char *code, int fileLength) {
 }
 
 #ifndef __EMSCRIPTEN__
-int main() {
+int main(int argc, char *argv[]) {
+  
+  if (argc < 2) {
+    printf("Error: Supply file to read from.\n");
+    return 0;
+  }
+
   // open file
-  FILE *p_file = fopen("code.txt", "r");
+  FILE *p_file = fopen(argv[1], "r");
 
   // go to end, and record position (this will be the length of the file)
   fseek(p_file, 0, SEEK_END);
