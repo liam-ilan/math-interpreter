@@ -1,9 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+
 body, html {
   font-family: 'Source Code Pro', monospace;
   background-color: #272822;
   color: #F8F8F2;
   -webkit-font-smoothing: antialiased;
+  font-size: 1em;
 }
 
 h1 {
@@ -13,6 +15,10 @@ h1 {
 h2 {
   font-size: 1.5em;
   font-weight: normal;
+}
+
+h3 {
+  font-size: 1.3em;
 }
 
 pre {
