@@ -30,7 +30,33 @@
         <pre id="execute"></pre>
       </div>
     </div>
-    
+
+    <div id="description">
+      <h3>About</h3>
+
+      <p>This project is a simple math interpeter. It supports expressions involving additon ("+"), subtraction ("-"), multiplication ("*"), division ("/"), brackets ("(" and ")"), and both floating point and integer arithmetic. The grammar for the inperpreter, in EBNF, is:</p>
+
+      <p class="ebnf">
+        unary = ("-", unary) | int | float | ("(", expression, ")"); </br>
+        factor = (factor, ("*" | "/"), unary) | unary; </br>
+        expression = (expression, ("+" | "-"), factor) | factor;
+      </p>
+
+      <p>
+        Or graphically,
+      </p>
+
+      <p class="image-container">
+        <img class="image" src="assets/syntax-diagram.png" alt="Visual description of EBNF above">
+        <p class="caption">Generated with Vincent Jacques <a href="https://jacquev6.github.io/DrawGrammar/">DrawGrammar</a></p>
+      </p>
+
+      <p>
+        The interpeter is implemented in around 600 lines of C, and then compiled to WASM with Emscripten to run on the web. The source code can be found at <a href="https://github.com/liam-ilan/math-interpreter">https://github.com/liam-ilan/math-interpreter</a>. 
+      </p>
+    </div>
+
+    <div id="footer">Copyright © 2023 <a href="https://www.liamilan.com/">Liam Ilan</a></div>
     <script type="text/javascript" src="index.js"></script>
     <script type="text/javascript" src="run.js"></script>
   </body>
