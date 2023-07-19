@@ -12,7 +12,7 @@ expression = (expression, ("+" | "-"), factor) | factor;
 
 Or graphically, 
 
-![Syntax diagram](public/readme-syntax-diagram.png)
+![Syntax diagram](/readme-syntax-diagram.png)
 
 *Generated with Vincent Jacques' DrawGrammar*
 
