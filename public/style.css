@@ -94,7 +94,9 @@ input::placeholder {
 }
 
 .image {
-  background-color: white;
+  background-color: #F8F8F2;
+  padding: 1em;
+  border-radius: 5px;
 }
 
 #expr {
