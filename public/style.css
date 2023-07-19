@@ -3,6 +3,7 @@ body, html {
   font-family: 'Source Code Pro', monospace;
   background-color: #272822;
   color: #F8F8F2;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1 {
