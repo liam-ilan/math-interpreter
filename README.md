@@ -11,24 +11,26 @@ expression = (expression, ("+" | "-"), factor) | factor;
 ```
 
 Or graphically, 
-![Syntax diagram](public/assets/syntax-diagram.png)
+
+![Syntax diagram](public/readme-syntax-diagram.png)
+
 *Generated with Vincent Jacques' DrawGrammar*
 
 The interpeter is implemented in around 600 lines of C, and then compiled to WASM with Emscripten to run on the web. Play around with the interpreter [here](https://liam-ilan.github.io/math-interpreter/).
 
 ## Development
 All interpreter code can be found in `main.c`. To compile the interpreter with gcc (not emscripten), run
-```
+```bash
 gcc main.c -o ./main
 ```
 
-The version of `./main` in this repo was built for Linux.
+The version of `./main` included in this repo was built for Linux.
 
 When compiled without emscripten, the interpreter reads from a supplied file. Run
+```bash
+./main file_name.here
 ```
-./main <file name here>
-```
-to run the math expression contained in the given file.
+to run the math expression contained in the given file. `code.txt` contains a sample test expression to get started.
 
 ### Compiling for the Web
 This project utilzes Emscripten and WASM to compile and run on the web [here](https://liam-ilan.github.io/math-interpreter/).
